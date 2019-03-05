@@ -17,6 +17,7 @@ flask-migrate = "*"
 pymysql = "*"
 flask-mail = "*"
 pipfile = "*"
+flask-login = "*"
 
 [requires]
 python_version = "3.7"
