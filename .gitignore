@@ -112,3 +112,6 @@ Pipfile.lock
 
 # vscode
 .vscode/
+
+# sqlite
+data-dev.sqlite
