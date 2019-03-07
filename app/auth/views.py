@@ -8,7 +8,7 @@ from wtforms import ValidationError
 from . import auth
 from ..models import User
 from .. import db
-from .forms import LoginForm, RegistrationForm
+from .forms import LoginForm, RegistrationForm, ChangePasswordForm
 from ..email import send_email
 
 
@@ -108,3 +108,24 @@ def resend_confirmation():
         'auth/mail/confirm', user=current_user, token=token)
     flash('A new confirmation email has been sent to you by email.')
     return redirect(url_for('main.index'))
+
+
+@auth.route('/chpassword', methods=['GET', 'POST'])
+@login_required
+def chpassword():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        if current_user.verify_password(form.old_password.data):
+            user = User.query.filter_by(id=current_user.id).first()
+            user.password = form.new_password.data
+            db.session.add(user)
+            db.session.commit()
+            flash('Change Password Successfully！')
+            return redirect(url_for('main.index'))
+        else:
+            flash('Old Password Error!')
+            form.old_password.data = ""
+            form.new_password.data = ""
+    return render_template('auth/chpassword.html', form=form)
+
+    
