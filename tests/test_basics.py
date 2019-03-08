@@ -3,8 +3,8 @@ import unittest
 from flask import current_app
 from app import create_app, db
 
-# config_type = 'testing'
-config_type = 'development'
+config_type = 'testing'
+# config_type = 'development'
 # config_type = 'production'
 
 
