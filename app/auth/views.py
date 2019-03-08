@@ -6,9 +6,10 @@ from wtforms import ValidationError
 
 
 from . import auth
-from ..models import User
+from ..models import User, parse_token
 from .. import db
-from .forms import LoginForm, RegistrationForm, ChangePasswordForm
+from .forms import LoginForm, RegistrationForm
+from .forms import ChangePasswordForm, ResetPasswordForm, ReNewPasswordForm
 from ..email import send_email
 
 
@@ -128,4 +129,35 @@ def chpassword():
             form.new_password.data = ""
     return render_template('auth/chpassword.html', form=form)
 
+    
+@auth.route('/repassword', methods=['GET', 'POST'])
+def repassword():
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        token = user.generate_confirmation_token()
+        send_email(user.email, 'Reset Password',
+                'auth/mail/repassword', user=user, token=token)
+        flash('Reset Link has sent. Please check your Email box.')
+        form.email.data=""
+        return redirect(url_for('main.index'))
+    return render_template('auth/repassword.html', form=form) 
+
+
+@auth.route('/repassword/<token>', methods=['GET', 'POST'])
+def renewpassword(token):
+    form = ReNewPasswordForm()
+    if form.validate_on_submit():
+        data = parse_token(token)
+        user_id = data.get('confirm')
+        if user_id:
+            user = User.query.filter_by(id=user_id).first()
+            if user:
+                user.password = form.new_password.data
+                db.session.add(user)
+                db.session.commit()
+                flash('Reset Password Successfully!')
+                form.new_password.data = ""
+                return redirect(url_for('main.index'))
+    return render_template('auth/repassword.html', form=form)
     

@@ -45,10 +45,7 @@ class User(UserMixin, db.Model):
 
     def confirm(self, token):
         s = Serializer(current_app.config['SECRET_KEY'])
-        try:
-            data = s.loads(token.encode('utf-8'))
-        except:
-            return False
+        data = parse_token(token)
         if data.get('confirm') != self.id:
             return False
         self.confirmed = True
@@ -62,3 +59,12 @@ class User(UserMixin, db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+def parse_token(token):
+    s = Serializer(current_app.config['SECRET_KEY'])
+    try:
+        data = s.loads(token.encode('utf-8'))
+    except:
+        return False
+    return data
