@@ -9,12 +9,18 @@ from . import auth
 from ..models import User, parse_token
 from .. import db
 from .forms import LoginForm, RegistrationForm
-from .forms import ChangePasswordForm, ResetPasswordForm, ReNewPasswordForm
+from .forms import ChangePasswordForm, ChangeEmailForm
+from .forms import ResetPasswordForm, ReNewPasswordForm
 from ..email import send_email
 
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    try:
+        if current_user.id:
+            return redirect(url_for('main.index'))
+    except AttributeError:
+        pass
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -38,6 +44,7 @@ def logout():
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
+    pagetitle = 'Register'
     form = RegistrationForm()
     if form.validate_on_submit():
         if adduser(form):
@@ -49,7 +56,8 @@ def register():
                 flash('A confirmation email has been sent to you by email.')
                 login_user(user, True)
             return redirect(url_for('main.index'))
-    return render_template('auth/register.html', form=form)
+    return render_template('auth/formpage.html',
+                            form=form, pagetitle=pagetitle)
 
 
 def adduser(form):
@@ -114,12 +122,12 @@ def resend_confirmation():
 @auth.route('/chpassword', methods=['GET', 'POST'])
 @login_required
 def chpassword():
+    pagetitle = 'Change Password'
     form = ChangePasswordForm()
     if form.validate_on_submit():
         if current_user.verify_password(form.old_password.data):
-            user = User.query.filter_by(id=current_user.id).first()
-            user.password = form.new_password.data
-            db.session.add(user)
+            current_user.password = form.new_password.data
+            db.session.add(current_user)
             db.session.commit()
             flash('Change Password Successfully！')
             return redirect(url_for('main.index'))
@@ -127,11 +135,13 @@ def chpassword():
             flash('Old Password Error!')
             form.old_password.data = ""
             form.new_password.data = ""
-    return render_template('auth/chpassword.html', form=form)
+    return render_template('auth/formpage.html',
+                        form=form, pagetitle=pagetitle)
 
     
 @auth.route('/repassword', methods=['GET', 'POST'])
 def repassword():
+    pagetitle = 'Reset Password'
     form = ResetPasswordForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -141,11 +151,13 @@ def repassword():
         flash('Reset Link has sent. Please check your Email box.')
         form.email.data=""
         return redirect(url_for('main.index'))
-    return render_template('auth/repassword.html', form=form) 
+    return render_template('auth/formpage.html',
+                        form=form, pagetitle=pagetitle) 
 
 
 @auth.route('/repassword/<token>', methods=['GET', 'POST'])
 def renewpassword(token):
+    pagetitle = 'ReNew Password'
     form = ReNewPasswordForm()
     if form.validate_on_submit():
         data = parse_token(token)
@@ -159,5 +171,40 @@ def renewpassword(token):
                 flash('Reset Password Successfully!')
                 form.new_password.data = ""
                 return redirect(url_for('main.index'))
-    return render_template('auth/repassword.html', form=form)
+    return render_template('auth/formpage.html',
+                        form=form, pagetitle=pagetitle)
+    
+
+@auth.route('/chemail', methods=['GET', 'POST'])
+@login_required
+def chemail():
+    pagetitle = 'Change E-Mail'
+    form = ChangeEmailForm()
+    if form.validate_on_submit():
+        if current_user.verify_password(form.password.data):
+            data = {'newemail': form.email.data}
+            token = current_user.generate_confirmation_token(data=data)
+            send_email(form.email.data, 'Change E-mail',
+                       'auth/mail/chemail', user=current_user, token=token)
+            flash('Please check your email box！ To Confirm this change.')
+            return redirect(url_for('main.index'))
+        else:
+            flash('Password is wrong.')
+    return render_template('auth/formpage.html',
+                            form=form, pagetitle=pagetitle)
+
+
+@auth.route('/chemail/<token>')
+@login_required
+def chemailconfirm(token):
+    data = parse_token(token)
+    newemail = data.get('newemail')
+    if newemail:
+        current_user.email = newemail
+        db.session.add(current_user)
+        db.session.commit()
+        flash('Change E-mail Successfully!')
+    else:
+        flash('Change E-mail failed!')
+    return redirect(url_for('main.index'))
     

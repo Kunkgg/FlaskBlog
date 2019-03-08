@@ -1,0 +1,7 @@
+Dear {{ user.username }},
+Try to change E-mail.
+To confirm this change, click on the following link:
+{{ url_for('auth.chemailconfirm', token=token, _external=True) }}
+Sincerely,
+The Flasky Team
+Note: replies to this email address are not monitored.

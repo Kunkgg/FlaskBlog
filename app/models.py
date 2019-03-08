@@ -24,7 +24,6 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), unique=True, index=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     confirmed = db.Column(db.Boolean, default=False)
-
     # add password feild
     password_hash = db.Column(db.String(128))
 
@@ -39,12 +38,13 @@ class User(UserMixin, db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def generate_confirmation_token(self, expiration=3600):
+    def generate_confirmation_token(self, expiration=3600, data={}):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'confirm': self.id}).decode('utf-8')
+        d = {'confirm': self.id}
+        d.update(data)
+        return s.dumps(d).decode('utf-8')
 
     def confirm(self, token):
-        s = Serializer(current_app.config['SECRET_KEY'])
         data = parse_token(token)
         if data.get('confirm') != self.id:
             return False

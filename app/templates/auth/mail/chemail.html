@@ -1,0 +1,21 @@
+
+{% extends "base.html" %}
+
+{% block title %}Flasky - Change E-mail{% endblock %}
+{% block navbar %}{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Dear {{ user.username }},</h1>
+</div>
+<div>
+    <h2>Try to change E-mail!</h2>
+    <p>To confirm E-mail change, please click on the following link:</p>
+    <a href={{ url_for('auth.chemailconfirm', token=token, _external=True) }}>Change E-mail Confirm Link</a>
+    <p>Sincerely,</p>
+    <p>The Flasky Team</p>
+    <p>Note: replies to this email address are not monitored.</p>
+</div>
+{% endblock %}
+
+
