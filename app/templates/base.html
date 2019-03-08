@@ -32,15 +32,11 @@
                         <ul class="dropdown-menu">
                             <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
                             <li><a href="{{ url_for('auth.chpassword') }}">Change Password</a></li>
+                            <li><a href="{{ url_for('auth.chemail') }}">Change Email</a></li>
                             <li class="divider"></li>
                             <li><a href="#">Settings</a></li>
                         </ul>
                 </li>
-  
-    
-               
-                
-
                 {% else %}
                 <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
                 {% endif %}
