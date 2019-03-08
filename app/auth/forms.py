@@ -43,3 +43,18 @@ class ChangePasswordForm(FlaskForm):
     old_password = PasswordField('Input old password', validators=[DataRequired()])
     new_password = PasswordField('Input new password', validators=[DataRequired()])
     submit = SubmitField('Change Password')
+
+
+class ResetPasswordForm(FlaskForm):
+    email = StringField('Email', validators=[
+        DataRequired(), Length(1, 64), Email()])
+    submit = SubmitField('Submit')
+
+    def validate_email(self, field):
+        if not User.query.filter_by(email=field.data).first():
+            raise ValidationError('This Email is not registered.') 
+
+
+class ReNewPasswordForm(FlaskForm):
+    new_password = PasswordField('Input new password', validators=[DataRequired()]) 
+    submit = SubmitField('Reset Password')

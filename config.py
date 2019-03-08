@@ -11,7 +11,8 @@ class Config:
         ['true', 'on', '1']
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    MAIL_SUPPRESS_SEND = os.environ.get('MAIL_SUPPRESS_SEND')
+    MAIL_SUPPRESS_SEND = os.environ.get('MAIL_SUPPRESS_SEND').lower in \
+        ['true', 'on', '1']
     FLASKY_MAIL_SUBJECT_PREFIX = '[Flasky]'
     FLASKY_MAIL_SENDER = 'Kung <gk_520@hotmail.com>'
     FLASKY_ADMIN = os.environ.get('FLASKY_ADMIN')
