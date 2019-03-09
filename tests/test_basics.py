@@ -2,6 +2,7 @@
 import unittest
 from flask import current_app
 from app import create_app, db
+from app.models import Role
 
 config_type = 'testing'
 # config_type = 'development'
@@ -17,6 +18,7 @@ class BasicsTestCase(unittest.TestCase):
         self.app_context = self.app.app_context()
         self.app_context.push()
         db.create_all()
+        Role.insert_roles()
 
     def tearDown(self):
         db.session.remove()

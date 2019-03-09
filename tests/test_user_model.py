@@ -1,6 +1,7 @@
 import unittest
 import time
-from app.models import User
+from flask import current_app
+from app.models import Role, User, AnonymousUser, Permission
 from app import db
 
 
@@ -47,3 +48,39 @@ class UserModelTestCase(unittest.TestCase):
         token = u.generate_confirmation_token(1)
         time.sleep(2)
         self.assertFalse(u.confirm(token))
+
+    def test_user_role(self):
+        u = User(username='test1', email='test1@example.com', password='cat')
+        self.assertTrue(u.can(Permission.FOLLOW))
+        self.assertTrue(u.can(Permission.COMMENT))
+        self.assertTrue(u.can(Permission.WRITE))
+        self.assertFalse(u.can(Permission.MODERATE))
+        self.assertFalse(u.can(Permission.ADMIN))
+
+    def test_moderator_role(self):
+        u = User(username='test2', email='test2@example.com', password='cat')
+        moderator_role = Role.query.filter_by(name='Moderator').first()
+        u.role = moderator_role
+        self.assertTrue(u.can(Permission.FOLLOW))
+        self.assertTrue(u.can(Permission.COMMENT))
+        self.assertTrue(u.can(Permission.WRITE))
+        self.assertTrue(u.can(Permission.MODERATE))
+        self.assertFalse(u.can(Permission.ADMIN))
+    
+    def test_admin_role(self):
+        u = User(username='test3', email=current_app.config['FLASKY_ADMIN'], password='cat')
+        Administrator_role = Role.query.filter_by(name='Administrator').first()
+        u.role = Administrator_role
+        self.assertTrue(u.can(Permission.FOLLOW))
+        self.assertTrue(u.can(Permission.COMMENT))
+        self.assertTrue(u.can(Permission.WRITE))
+        self.assertTrue(u.can(Permission.MODERATE))
+        self.assertTrue(u.can(Permission.ADMIN))
+
+    def test_anonymous_user(self):
+        u = AnonymousUser()
+        self.assertFalse(u.can(Permission.FOLLOW))
+        self.assertFalse(u.can(Permission.COMMENT))
+        self.assertFalse(u.can(Permission.WRITE))
+        self.assertFalse(u.can(Permission.MODERATE))
+        self.assertFalse(u.can(Permission.ADMIN))
