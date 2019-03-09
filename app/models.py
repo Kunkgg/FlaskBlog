@@ -80,7 +80,7 @@ class User(UserMixin, db.Model):
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
-        if self.email == current_app.config['FLASK_ADMIN']:
+        if self.email == current_app.config['FLASKY_ADMIN']:
             self.role = Role.query.filter_by(name='Administrator').first()
         if self.role is None:
             self.role = Role.query.filter_by(default=True).first()
@@ -104,6 +104,8 @@ class User(UserMixin, db.Model):
 
     def confirm(self, token):
         data = parse_token(token)
+        if data is None:
+            return False
         if data.get('confirm') != self.id:
             return False
         self.confirmed = True
@@ -130,7 +132,7 @@ def parse_token(token):
     try:
         data = s.loads(token.encode('utf-8'))
     except:
-        return False
+        return
     return data
 
 

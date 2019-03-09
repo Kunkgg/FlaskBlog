@@ -3,6 +3,7 @@ import unittest
 from app.email import send_email
 
 
+@unittest.skip
 class EmailTestCase(unittest.TestCase):
     def test_send_email(self):
         try:
