@@ -89,18 +89,16 @@ def confirm(token):
 
 @auth.before_app_request
 def before_request():
-    if current_user and current_user.is_authenticated:
-        current_user.ping()
     user_confirmed = False
     try:
         user_confirmed = current_user.confirmed
     except AttributeError:
         pass
     if all([current_user.is_authenticated,
-            not user_confirmed,
-            request.blueprint != 'auth',
-            request.endpoint != 'static',
-            request.blueprint != 'main']):
+        not user_confirmed,
+        request.blueprint != 'auth',
+        request.endpoint != 'static',
+        request.blueprint != 'main']):
             return redirect(url_for('auth.unconfirmed'))
 
 
@@ -116,7 +114,7 @@ def unconfirmed():
 def resend_confirmation():
     token = current_user.generate_confirmation_token()
     send_email(current_user.email, 'Confirm Your Account',
-               'auth/mail/confirm', user=current_user, token=token)
+        'auth/mail/confirm', user=current_user, token=token)
     flash('A new confirmation email has been sent to you by email.')
     return redirect(url_for('main.index'))
 
@@ -138,7 +136,7 @@ def chpassword():
             form.old_password.data = ""
             form.new_password.data = ""
     return render_template('auth/formpage.html',
-                           form=form, pagetitle=pagetitle)
+                        form=form, pagetitle=pagetitle)
 
     
 @auth.route('/repassword', methods=['GET', 'POST'])
@@ -149,12 +147,12 @@ def repassword():
         user = User.query.filter_by(email=form.email.data).first()
         token = user.generate_confirmation_token()
         send_email(user.email, 'Reset Password',
-                   'auth/mail/repassword', user=user, token=token)
+                'auth/mail/repassword', user=user, token=token)
         flash('Reset Link has sent. Please check your Email box.')
-        form.email.data = ""
+        form.email.data=""
         return redirect(url_for('main.index'))
     return render_template('auth/formpage.html',
-                           form=form, pagetitle=pagetitle) 
+                        form=form, pagetitle=pagetitle) 
 
 
 @auth.route('/repassword/<token>', methods=['GET', 'POST'])
@@ -174,7 +172,7 @@ def renewpassword(token):
                 form.new_password.data = ""
                 return redirect(url_for('main.index'))
     return render_template('auth/formpage.html',
-                           form=form, pagetitle=pagetitle)
+                        form=form, pagetitle=pagetitle)
     
 
 @auth.route('/chemail', methods=['GET', 'POST'])
@@ -193,13 +191,17 @@ def chemail():
         else:
             flash('Password is wrong.')
     return render_template('auth/formpage.html',
-                           form=form, pagetitle=pagetitle)
+                            form=form, pagetitle=pagetitle)
 
 
 @auth.route('/chemail/<token>')
 @login_required
 def chemailconfirm(token):
-    if current_user.change_email(token):
+    data = parse_token(token)
+    newemail = data.get('newemail')
+    if newemail:
+        current_user.email = newemail
+        db.session.add(current_user)
         db.session.commit()
         flash('Change E-mail Successfully!')
     else:
