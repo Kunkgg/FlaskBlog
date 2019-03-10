@@ -7,7 +7,6 @@
 {{ super() }}
 <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 {% endblock %}
 
 {% block navbar %}
@@ -26,19 +25,16 @@
             <ul class="nav navbar-nav">
                 <li><a href="{{ url_for('main.index') }}">Home</a></li>
             </ul>
-            <ul class="nav navbar-nav">
-                <li><a href="{{ url_for('main.user', username=current_user.username) }}">Profile</a></li>
-            </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if current_user.is_authenticated %}
                  <li class="dropdown">
-                        <a href="#" data-toggle="dropdown" class="dropdown-toggle">Account<b class="caret"></b></a>
+                        <a href="#" data-toggle="dropdown" class="dropdown-toggle">Menu <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
                             <li><a href="{{ url_for('auth.chpassword') }}">Change Password</a></li>
                             <li><a href="{{ url_for('auth.chemail') }}">Change Email</a></li>
-                            {# <li class="divider"></li>
-                            <li><a href="#">Settings</a></li> #}
+                            <li class="divider"></li>
+                            <li><a href="#">Settings</a></li>
                         </ul>
                 </li>
                 {% else %}
