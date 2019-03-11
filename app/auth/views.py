@@ -52,12 +52,12 @@ def register():
             if user:
                 token = user.generate_confirmation_token()
                 send_email(user.email, 'Confirm Your Account',
-                'auth/mail/confirm', user=user, token=token)
+                           'auth/mail/confirm', user=user, token=token)
                 flash('A confirmation email has been sent to you by email.')
                 login_user(user, True)
             return redirect(url_for('main.index'))
     return render_template('auth/formpage.html',
-                            form=form, pagetitle=pagetitle)
+                           form=form, pagetitle=pagetitle)
 
 
 def adduser(form):

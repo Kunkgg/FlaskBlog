@@ -1,6 +1,8 @@
 
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
 
 {% block title %}Flasky{% endblock %}
 
@@ -14,6 +16,9 @@
     {% if current_user.can(Permission.WRITE) %}
         {{ wtf.quick_form(form) }}
     {% endif %}
+    {% include "_post.html" %}
+    <div class="pagination">
+    {{ macros.pagination_widget(pagination, '.index') }}
+    </div>
 </div>
-{% include "_post.html" %}
 {% endblock %}

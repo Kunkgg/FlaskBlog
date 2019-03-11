@@ -1,5 +1,7 @@
 
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
 {% block title %}Flasky - {{ user.username }}{% endblock %}
 {% block page_content %}
 <img class="img-rounded profile-thumbnail" src="{{ user.gravatar(size=256) }}">
@@ -35,6 +37,41 @@ Edit Profile [Admin]
 </a>
 {% endif %}
 </div>
+{% if posts %}
 <h3>Post by {{ user.username }}</h3>
+{% endif %}
 {% include "_post.html" %}
+<div class="pagination">
+{# {{ macros.pagination_widget(pagination, '.user') }} #}
+{% if pagination.pages > 1 %}
+<ul class="pagination">
+    <li {% if not pagination.has_prev %} class="disabled"{% endif %}>
+        <a href="{% if pagination.has_prev %}{{ url_for('.user', username=username,
+        page = pagination.page - 1) }}{% else %}#{% endif %}">
+        &laquo;
+        </a>
+    </li>
+    {% for p in pagination.iter_pages() %}
+        {% if p %}
+            {% if p == pagination.page %}
+                <li class="active">
+                    <a href="{{ url_for('.user', username=user.username, page = p) }}">{{ p }}</a>
+                </li>
+            {% else %}
+                <li>
+                    <a href="{{ url_for('.user', username=user.username, page = p) }}">{{ p }}</a>
+                </li>
+            {% endif %}
+        {% else %}
+            <li class="disabled"><a href="#">&hellip;</a></li>
+        {% endif %}
+    {% endfor %}
+    <li {% if not pagination.has_next %} class="disabled"{% endif %}>
+        <a href="{% if pagination.has_next %}{{ url_for('.user', username=user.username,
+        page = pagination.page + 1) }}{% else %}#{% endif %}">
+        &raquo;</a>
+    </li>
+{% endif %}
+</ul>
+</div>
 {% endblock %}
