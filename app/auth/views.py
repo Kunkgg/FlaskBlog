@@ -79,7 +79,8 @@ def adduser(form):
 def confirm(token):
     if current_user.confirmed:
         return redirect(url_for('main.index'))
-    if current_user.confirm(token):
+    user = current_user._get_current_object()
+    if user.confirm(token):
         db.session.commit()
         flash('You have confirmed your account. Thanks!')
     else:
@@ -128,8 +129,9 @@ def chpassword():
     form = ChangePasswordForm()
     if form.validate_on_submit():
         if current_user.verify_password(form.old_password.data):
-            current_user.password = form.new_password.data
-            db.session.add(current_user)
+            user = current_user._get_current_object()
+            user.password = form.new_password.data
+            db.session.add(user)
             db.session.commit()
             flash('Change Password Successfully！')
             return redirect(url_for('main.index'))
@@ -199,7 +201,8 @@ def chemail():
 @auth.route('/chemail/<token>')
 @login_required
 def chemailconfirm(token):
-    if current_user.change_email(token):
+    user = current_user._get_current_object()
+    if user.change_email(token):
         db.session.commit()
         flash('Change E-mail Successfully!')
     else:
