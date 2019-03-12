@@ -42,8 +42,9 @@ Edit Profile [Admin]
 {% endif %}
 {% include "_post.html" %}
 <div class="pagination">
-{# {{ macros.pagination_widget(pagination, '.user') }} #}
-{% if pagination.pages > 1 %}
+{{ macros.pagination_widget_for_userpage(pagination, '.user', user.username) }}
+
+{# {% if pagination.pages > 1 %}
 <ul class="pagination">
     <li {% if not pagination.has_prev %} class="disabled"{% endif %}>
         <a href="{% if pagination.has_prev %}{{ url_for('.user', username=username,
@@ -72,6 +73,6 @@ Edit Profile [Admin]
         &raquo;</a>
     </li>
 {% endif %}
-</ul>
+</ul> #}
 </div>
 {% endblock %}
