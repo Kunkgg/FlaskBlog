@@ -5,6 +5,8 @@ from flask_login import UserMixin, AnonymousUserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
 from flask import request
+from markdown import markdown
+import bleach
 
 from . import db
 from . import login_manager
@@ -200,5 +202,23 @@ class Post(db.Model):
     __tablename__ = 'posts'
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text)
+    # cache the html from markdowntext
+    body_html = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        """for db.event.listen method"""
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+                        'h1', 'h2', 'h3', 'p']
+        html = markdown(value, output_format='html')
+        # bleach.clean method filters html tags.
+        # bleach.linkify method translates the URL text to <a tag> 
+        target.body_html = bleach.linkify(bleach.clean(html,
+                                                       tags=allowed_tags,
+                                                       strip=True))
+
+# Setting event listening for updating Post.body_html while Post.body changing.
+db.event.listen(Post.body, 'set', Post.on_changed_body)
