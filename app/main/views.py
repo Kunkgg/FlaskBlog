@@ -90,3 +90,9 @@ def edit_profile_admin(id):
     form.location.data = user.location
     form.about_me.data = user.about_me
     return render_template('edit_profile.html', form=form, user=user)
+
+
+@main.route('/post/<int:id>')
+def post(id):
+    posts = Post.query.filter_by(id=id).first_or_404()
+    return render_template('post.html', posts=[posts])

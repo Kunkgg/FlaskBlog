@@ -40,7 +40,7 @@ Edit Profile [Admin]
 {% if posts %}
 <h3>Post by {{ user.username }}</h3>
 {% endif %}
-{% include "_post.html" %}
+{% include "_posts.html" %}
 <div class="pagination">
 {{ macros.pagination_widget_for_userpage(pagination, '.user', user.username) }}
 
