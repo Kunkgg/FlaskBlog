@@ -115,3 +115,6 @@ Pipfile.lock
 
 # sqlite
 data-dev.sqlite
+
+# make_env.sh
+make_env.sh
