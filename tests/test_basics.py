@@ -12,9 +12,6 @@ config_type = 'testing'
 class BasicsTestCase(unittest.TestCase):
     def setUp(self):
         self.app = create_app(config_type)
-        # for k, v in self.app.config.items():
-        #     if v is not None:
-        #         print('{!r:48}: {}'.format(k, v))
         self.app_context = self.app.app_context()
         self.app_context.push()
         db.create_all()

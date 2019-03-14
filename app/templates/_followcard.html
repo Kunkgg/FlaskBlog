@@ -1,0 +1,21 @@
+
+<div>
+    <ul class="">
+        {% for follow in follows %}
+        <li class="">
+            <div class="">
+                <a href="{{ url_for('.user', username=follow['user'].username) }}">
+                    <img class=""
+                    src="{{ follow['user'].gravatar(size=40) }}">
+                </a>
+            </div>
+            <div class="">{{ moment(follow['timestamp']).format('LLL') }} </div>
+            <div class="">
+                <a href="{{ url_for('.user', username=follow['user'].username) }}">
+                    {{ follow['user'].username }}
+                </a>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>

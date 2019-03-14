@@ -1,0 +1,14 @@
+
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+{% block title %}{{ title }} - {{ user.username }} {% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>{{ title }} {{ user.username }}</h1>
+</div>
+{% include "_followcard.html" %}
+<div class="pagination">
+    {{ macros.pagination_widget_for_userpage(pagination, endpoint, user.username) }}
+</div>
+{% endblock %}

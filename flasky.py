@@ -18,11 +18,12 @@ def test():
     """Run the unit tests."""
     import unittest
     from tests.test_basics import BasicsTestCase
-    from tests.test_mail import EmailTestCase
+    # from tests.test_mail import EmailTestCase
+    from tests.test_follow import FollowTestCase
     bt = BasicsTestCase()
     bt.setUp()
-    tests = unittest.TestLoader().discover('tests')
+    # tests = unittest.TestLoader().discover('tests')
     # tests = unittest.TestLoader().loadTestsFromModule('./tests/test_mail.py')
-    # tests = unittest.TestLoader().loadTestsFromTestCase(EmailTestCase)
+    tests = unittest.TestLoader().loadTestsFromTestCase(FollowTestCase)
     unittest.TextTestRunner(verbosity=2).run(tests)
     bt.tearDown()

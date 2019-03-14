@@ -34,7 +34,7 @@
             <ul class="nav navbar-nav navbar-right">
                 {% if current_user.is_authenticated %}
                  <li class="dropdown">
-                        <a href="#" data-toggle="dropdown" class="dropdown-toggle">Account<b class="caret"></b></a>
+                        <a href="#" data-toggle="dropdown" class="dropdown-toggle">Account {{current_user.username}}<b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
                             <li><a href="{{ url_for('auth.chpassword') }}">Change Password</a></li>

@@ -36,6 +36,24 @@ href="{{ url_for('.edit_profile_admin', id=user.id) }}">
 Edit Profile [Admin]
 </a>
 {% endif %}
+
+{% if current_user.can(Permission.FOLLOW) and user != current_user %}
+{% if not current_user.is_following(user) %}
+<a href="{{ url_for('.follow', username=user.username) }}" class="btn btn-primary">Follow</a>
+{% else %}
+<a href="{{ url_for('.unfollow', username=user.username) }}" class="btn btn-default">Unfollow</a>
+{% endif %}
+{% endif %}
+<a href="{{ url_for('.followers', username=user.username) }}">
+    Followers: <span class="badge">{{ user.followers.count() - 1 }}</span>
+</a>
+<a href="{{ url_for('.followed_by', username=user.username) }}">
+    Following: <span class="badge">{{ user.followed.count() }}</span>
+</a>
+{% if current_user.is_authenticated and user != current_user and user.is_following(current_user) %}
+<span class="label label-default">| Follows you</span>
+{% endif %}
+
 </div>
 {% if posts %}
 <h3>Post by {{ user.username }}</h3>
@@ -43,36 +61,5 @@ Edit Profile [Admin]
 {% include "_posts.html" %}
 <div class="pagination">
 {{ macros.pagination_widget_for_userpage(pagination, '.user', user.username) }}
-
-{# {% if pagination.pages > 1 %}
-<ul class="pagination">
-    <li {% if not pagination.has_prev %} class="disabled"{% endif %}>
-        <a href="{% if pagination.has_prev %}{{ url_for('.user', username=username,
-        page = pagination.page - 1) }}{% else %}#{% endif %}">
-        &laquo;
-        </a>
-    </li>
-    {% for p in pagination.iter_pages() %}
-        {% if p %}
-            {% if p == pagination.page %}
-                <li class="active">
-                    <a href="{{ url_for('.user', username=user.username, page = p) }}">{{ p }}</a>
-                </li>
-            {% else %}
-                <li>
-                    <a href="{{ url_for('.user', username=user.username, page = p) }}">{{ p }}</a>
-                </li>
-            {% endif %}
-        {% else %}
-            <li class="disabled"><a href="#">&hellip;</a></li>
-        {% endif %}
-    {% endfor %}
-    <li {% if not pagination.has_next %} class="disabled"{% endif %}>
-        <a href="{% if pagination.has_next %}{{ url_for('.user', username=user.username,
-        page = pagination.page + 1) }}{% else %}#{% endif %}">
-        &raquo;</a>
-    </li>
-{% endif %}
-</ul> #}
 </div>
 {% endblock %}

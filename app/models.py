@@ -75,6 +75,15 @@ class Role(db.Model):
         db.session.commit()
 
 
+class Follow(db.Model):
+    __tablename__ = 'follows'
+    follower_id = db.Column(db.Integer, db.ForeignKey('users.id'),
+                            primary_key=True)
+    followed_id = db.Column(db.Integer, db.ForeignKey('users.id'),
+                            primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -94,6 +103,20 @@ class User(UserMixin, db.Model):
     avatar_hash = db.Column(db.String(32))
     # posts feild
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+    # follow feilds
+    # user.followed, who had been followed by the user.
+    # user.follower, who followed the user.
+    followed = db.relationship('Follow',
+                               foreign_keys=[Follow.follower_id],
+                               backref=db.backref('follower', lazy='joined'),
+                               lazy='dynamic',
+                               cascade='all, delete-orphan')
+
+    followers = db.relationship('Follow',
+                                foreign_keys=[Follow.followed_id],
+                                backref=db.backref('followed', lazy='joined'),
+                                lazy='dynamic',
+                                cascade='all, delete-orphan')
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -169,6 +192,30 @@ class User(UserMixin, db.Model):
                 u.avatar_hash = hash_string
                 db.session.add(u)
         db.session.commit()
+    
+    def follow(self, user):
+        if not self.is_following(user):
+            f = Follow(follower=self, followed=user)
+            db.session.add(f)
+            # db.session.commit()
+    
+    def unfollow(self, user):
+        f = self.followed.filter_by(followed_id=user.id).first()
+        if f:
+            db.session.delete(f)
+            # db.session.commit()
+    
+    def is_following(self, user):
+        if user.id is None:
+            return False
+        f = self.followed.filter_by(followed_id=user.id).first()
+        return f is not None
+    
+    def is_followed_by(self, user):
+        if user.id is None:
+            return False
+        f = self.followers.filter_by(follower_id=user.id).first()
+        return f is not None
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -222,3 +269,4 @@ class Post(db.Model):
 
 # Setting event listening for updating Post.body_html while Post.body changing.
 db.event.listen(Post.body, 'set', Post.on_changed_body)
+
