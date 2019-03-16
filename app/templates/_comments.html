@@ -1,0 +1,42 @@
+<div>
+    <ul class="posts">
+        {% for comment in comments %}
+        <li class="post">
+            <div class="profile-thumbnail">
+                <a href="{{ url_for('.user', username=comment.author.username) }}">
+                    <img class="img-rounded profile-thumbnail"
+                    src="{{ comment.author.gravatar(size=40) }}">
+                </a>
+            </div>
+            <div class="post-date">{{ moment(comment.timestamp).format('LLL') }}</div>
+            <div class="post-author">
+                <a href="{{ url_for('.user', username=comment.author.username) }}">
+                    {{ comment.author.username }}
+                </a>
+            </div>
+            <div class="post-content">
+                {% if comment.disabled %}
+                    <p><i>This comment has been disabled by a moderator.</i></p>
+                {% endif %}
+                {% if moderate or not comment.disabled %}
+                    {% if comment.body_html %}
+                        {{ comment.body_html | safe }}
+                    {% else %}
+                        {{ comment.body }}
+                    {% endif %}
+                {% endif %}
+            </div>
+            {% if current_user.can(Permission.MODERATE) %}
+                <br>
+                {% if comment.disabled %}
+                    <a class="btn btn-default btn-xs" href="{{ url_for('.moderate_enable',
+                    id=comment.id, page=page) }}">Enable</a>
+                {% else %}
+                    <a class="btn btn-danger btn-xs" href="{{ url_for('.moderate_disable',
+                    id=comment.id, page=page) }}">Disable</a>
+                {% endif %}
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</div>

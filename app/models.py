@@ -11,8 +11,6 @@ import bleach
 from . import db
 from . import login_manager
 
-DEFAULT_AVATAR_HASH = 'e75ad1fb14ac2f331d4423236ba55954'
-
 
 class Permission:
     FOLLOW = 1
@@ -118,6 +116,8 @@ class User(UserMixin, db.Model):
                                 lazy='dynamic',
                                 cascade='all, delete-orphan')
 
+    comments = db.relationship('Comment', backref='author', lazy='dynamic')
+
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.email == current_app.config['FLASKY_ADMIN']:
@@ -185,26 +185,16 @@ class User(UserMixin, db.Model):
             url = 'http://www.gravatar.com/avatar'
         hash = self.avatar_hash or self.gravatar_hash()
         return f'{url}/{hash}?s={size}&d={default}&r={rating}'
-
-    @staticmethod
-    def insert_default_avatar_hash(hash_string=DEFAULT_AVATAR_HASH):
-        for u in User.query.all():
-            if u.avatar_hash is None:
-                u.avatar_hash = hash_string
-                db.session.add(u)
-        db.session.commit()
     
     def follow(self, user):
         if not self.is_following(user):
             f = Follow(follower=self, followed=user)
             db.session.add(f)
-            # db.session.commit()
     
     def unfollow(self, user):
         f = self.followed.filter_by(followed_id=user.id).first()
         if f:
             db.session.delete(f)
-            # db.session.commit()
     
     def is_following(self, user):
         if user.id is None:
@@ -268,6 +258,7 @@ class Post(db.Model):
     body_html = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    comments = db.relationship('Comment', backref='post', lazy='dynamic')
 
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
@@ -285,3 +276,24 @@ class Post(db.Model):
 # Setting event listening for updating Post.body_html while Post.body changing.
 db.event.listen(Post.body, 'set', Post.on_changed_body)
 
+
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    body_html = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    disabled = db.Column(db.Boolean)
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        """for db.event.listen method"""
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'code', 'i',
+                        'em', 'strong']
+        html = markdown(value, output_format='html')
+        target.body_html = bleach.linkify(bleach.clean(html,
+                                                       tags=allowed_tags,
+                                                       strip=True))
+
+db.event.listen(Comment.body, 'set', Comment.on_changed_body)

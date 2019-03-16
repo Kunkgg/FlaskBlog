@@ -23,6 +23,7 @@
         <li {% if show_followed %} class="active"{% endif %}><a href="{{ url_for('.show_followed') }}">Followed</a></li>
         {% endif %}
     </ul>
+    </div>
     {% include '_posts.html' %}
 </div>
 {% if pagination %}

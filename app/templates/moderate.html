@@ -1,20 +1,15 @@
+
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 {% import "_macros.html" as macros %}
 
-{% block title %}Flasky - Post{% endblock %}
+{% block title %}Flasky - Moderate Comments{% endblock %}
 {% block page_content %}
-{% include '_posts.html' %}
-<h4 id="comments">Comments</h4>
-<div>
-    {% if current_user.can(Permission.WRITE) %}
-        {{ wtf.quick_form(form) }}
-    {% endif %}
-</div>
+<h2>Moderate Comments</h2>
 {% include '_comments.html' %}
 {% if pagination %}
 <div class="pagination">
-    {{ macros.pagination_widget_comments(pagination, '.post', fragment='#comments', id=posts[0].id) }}
+    {{ macros.pagination_widget(pagination, '.moderate') }}
 </div>
 {% endif %}
 {% endblock %}
