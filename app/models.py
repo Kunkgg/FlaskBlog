@@ -10,6 +10,7 @@ import bleach
 
 from . import db
 from . import login_manager
+from .exceptions import ValidationError
 
 
 class Permission:
@@ -155,6 +156,19 @@ class User(UserMixin, db.Model):
         db.session.add(self)
         return True
 
+    def generate_auth_token(self, expiration=3600, data={}):
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        d = {'id': self.id}
+        d.update(data)
+        return s.dumps(d).decode('utf-8')
+
+    @staticmethod
+    def verify_auth_token(token):
+        data = parse_token(token)
+        if data is None:
+            return None
+        return User.query.get(data['id'])
+
     def change_email(self, token):
         data = parse_token(token)
         newemail = data.get('newemail')
@@ -222,6 +236,18 @@ class User(UserMixin, db.Model):
                 db.session.add(user)
         db.session.commit()
 
+    def to_json(self):
+        json_user = {'url': url_for('api.get_user', id=self.id),
+                     'username': self.username,
+                     'member_since': self.member_since,
+                     'last_seen': self.last_seen,
+                     'posts_url': url_for('api.get_user_posts', id=self.id),
+                     'followed_posts_url': (url_for(
+                                            'api.get_user_followed_posts',
+                                            id=self.id)),
+                     'post_count': self.posts.count()}
+        return json_user
+
     def __repr__(self):
         return '<User %r>' % self.username
        
@@ -236,7 +262,7 @@ def parse_token(token):
     try:
         data = s.loads(token.encode('utf-8'))
     except:
-        return
+        return None
     return data
 
 
@@ -272,6 +298,25 @@ class Post(db.Model):
         target.body_html = bleach.linkify(bleach.clean(html,
                                                        tags=allowed_tags,
                                                        strip=True))
+                                            
+    def to_json(self):
+        json_post = {'url': url_for('api.get_post', id=self.id),
+                     'body': self.body,
+                     'body_html': self.body_html,
+                     'timestamp': self.timestamp,
+                     'author_url': url_for('api.get_user', id=self.author_id),
+                     'comments_url': url_for('api.get_post_comments',
+                                             id=self.id),
+                     'comment_count': self.comments.count()}
+        return json_post
+    
+    @staticmethod
+    def from_json(json_post):
+        body = json_post.get('body')
+        if body is None or body == '':
+            raise ValidationError('post does not have a body')
+        return Post(body=body)
+
 
 # Setting event listening for updating Post.body_html while Post.body changing.
 db.event.listen(Post.body, 'set', Post.on_changed_body)

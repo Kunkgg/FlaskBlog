@@ -238,7 +238,8 @@ def moderate_enable(id):
     comment.disabled = False
     db.session.add(comment)
     db.session.commit()
-    return redirect(url_for('.moderate', page=request.args.get('page', 1, type=int)))
+    return redirect(url_for('.moderate', page=request.args.get('page', 1,
+                                                               type=int)))
 
 
 @main.route('/moderate/disable/<int:id>')
@@ -249,5 +250,6 @@ def moderate_disable(id):
     comment.disabled = True
     db.session.add(comment)
     db.session.commit()
-    return redirect(url_for('.moderate', page=request.args.get('page', 1, type=int)))
+    return redirect(url_for('.moderate', page=request.args.get('page', 1,
+                                                               type=int)))
 
