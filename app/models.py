@@ -3,7 +3,7 @@ import hashlib
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, AnonymousUserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-from flask import current_app
+from flask import current_app, url_for
 from flask import request
 from markdown import markdown
 import bleach
@@ -340,5 +340,16 @@ class Comment(db.Model):
         target.body_html = bleach.linkify(bleach.clean(html,
                                                        tags=allowed_tags,
                                                        strip=True))
+
+    def to_json(self):
+        return {
+            'url': url_for('api.get_comment', id=self.id),
+            'body': self.body,
+            'body_html': self.body_html,
+            'timestamp': self.timestamp,
+            'disabled': self.disabled,
+            'author_url': url_for('api.get_user', id=self.author_id),
+            'post_url': url_for('api.get_post', id=self.post_id)
+        }
 
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)
