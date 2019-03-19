@@ -8,6 +8,7 @@ pep8 = "*"
 autopep8 = "*"
 faker = "*"
 httpie = "*"
+coverage = "*"
 
 [packages]
 flask = "*"

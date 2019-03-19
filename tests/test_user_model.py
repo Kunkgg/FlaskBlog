@@ -50,7 +50,7 @@ class UserModelTestCase(unittest.TestCase):
         self.assertFalse(u.confirm(token))
 
     def test_user_role(self):
-        u = User(username='test1', email='test1@example.com', password='cat')
+        u = User(username='test_user', email='test_user@example.com', password='cat')
         self.assertTrue(u.can(Permission.FOLLOW))
         self.assertTrue(u.can(Permission.COMMENT))
         self.assertTrue(u.can(Permission.WRITE))
@@ -58,7 +58,7 @@ class UserModelTestCase(unittest.TestCase):
         self.assertFalse(u.can(Permission.ADMIN))
 
     def test_moderator_role(self):
-        u = User(username='test2', email='test2@example.com', password='cat')
+        u = User(username='test_moderator', email='test_moderator@example.com', password='cat')
         moderator_role = Role.query.filter_by(name='Moderator').first()
         u.role = moderator_role
         self.assertTrue(u.can(Permission.FOLLOW))
@@ -68,7 +68,7 @@ class UserModelTestCase(unittest.TestCase):
         self.assertFalse(u.can(Permission.ADMIN))
     
     def test_admin_role(self):
-        u = User(username='test3', email=current_app.config['FLASKY_ADMIN'], password='cat')
+        u = User(username='test_admin', email=current_app.config['FLASKY_ADMIN'], password='cat')
         Administrator_role = Role.query.filter_by(name='Administrator').first()
         u.role = Administrator_role
         self.assertTrue(u.can(Permission.FOLLOW))
