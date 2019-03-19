@@ -48,3 +48,17 @@ def test(coverage):
         print(f'HTML version: file://{covdir}/index.html')
         COV.erase()
     bt.tearDown()
+
+
+@app.cli.command()
+@click.option('--length', default=25,
+              help='Number of functions to include in the profiler report.')
+@click.option('--profile-dir', default=None,
+              help='Directory where profiler data files are saved.')
+def profile(length, profile_dir):
+    """Start the application under the code profiler."""
+    from werkzeug.contrib.profiler import ProfilerMiddleware
+    app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[length],
+                                      profile_dir=profile_dir)
+    os.environ['FLASK_RUN_FROM_CLI'] = '1'
+    app.run(debug=False)
