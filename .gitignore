@@ -118,3 +118,7 @@ data-dev.sqlite
 
 # make_env.sh
 make_env.sh
+
+# jshint
+node_modules/
+package-lock.json
